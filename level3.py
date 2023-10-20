@@ -11,22 +11,25 @@ import csv
 from torchvision.models import resnet18
 from torchmetrics.functional.classification import binary_auroc, binary_precision_recall_curve
 from torch.utils.data import Dataset
+from torchvision.transforms.functional import to_tensor, to_pil_image
 
 class TwoImageFolder(Dataset):
-    def __init__(self, root, ctor, *args, **kwargs):
+    def __init__(self, root, ctor, transform, *args, **kwargs):
         super().__init__()
         self.ds1 = ctor(root=root, *args, **kwargs, is_valid_file=lambda fname: fname.endswith("0.png"))
         self.ds2 = ctor(root=root, *args, **kwargs, is_valid_file=lambda fname: fname.endswith("1.png"))
         assert len(self.ds1) == len(self.ds2)
+        self.transform = transform
 
     def __len__(self):
         return len(self.ds1)
 
     def __getitem__(self, item):
         x1, y1 = self.ds1[item]
-        x2, y2 = self.ds1[item]
+        x2, y2 = self.ds2[item]
         assert y1 == y2
-        return torch.min(x1, x2), y1
+        img = to_pil_image(torch.min(to_tensor(x1), to_tensor(x2)))
+        return self.transform(img), y1
 
 
 
@@ -48,7 +51,7 @@ def main():
     print(out.as_posix())
     out.mkdir(exist_ok=True, parents=True)
     device = torch.device("cuda")
-    train_transform = Compose([RandomCrop(size=200, padding=10), RandomHorizontalFlip(), ToTensor()])
+    train_transform = Compose([RandomCrop(size=200, padding=5), RandomHorizontalFlip(), ToTensor()])
     train_ds = TwoImageFolder(ctor=MyImageFolder, root="level_03/train_data", transform=train_transform)
     test_ds = TwoImageFolder(ctor=ImageFolder, root="level_03/test_data", transform=ToTensor())
     train_dl = DataLoader(train_ds, batch_size=32, shuffle=True, drop_last=True)
