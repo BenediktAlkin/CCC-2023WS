@@ -12,6 +12,8 @@ from torchvision.models import resnet18
 from torchmetrics.functional.classification import binary_auroc, binary_precision_recall_curve
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import to_tensor, to_pil_image
+from tqdm import tqdm
+from torchvision.ops.focal_loss import sigmoid_focal_loss
 
 from gaussian_blur import get_gaussian_blur
 class TwoImageFolder(Dataset):
@@ -73,7 +75,7 @@ def main():
     print(out.as_posix())
     out.mkdir(exist_ok=True, parents=True)
     device = torch.device("cuda")
-    train_transform = Compose([RandomHorizontalFlip()])
+    train_transform = nn.Identity()
     train_ds = TwoImageFolder(ctor=MyImageFolder, root="level_04/train_data", transform=train_transform)
     test_ds = TwoImageFolder(ctor=ImageFolder, root="level_04/test_data", transform=nn.Identity())
     train_dl = DataLoader(train_ds, batch_size=8, shuffle=True, drop_last=True)
@@ -95,14 +97,15 @@ def main():
         model.train()
         losses = []
         cdists = []
-        for x, y, coords in train_dl:
+        for x, y, coords in tqdm(train_dl):
             # ys.append(y.clone())
             x = x.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             coords = coords.to(device, non_blocking=True)
             y_hat = model(x).squeeze(1)
             optim.zero_grad()
-            loss = F.mse_loss(y_hat, y.float())
+            #loss = F.mse_loss(y_hat, (y * 5).float())
+            loss = sigmoid_focal_loss(y_hat, y.float(), reduction="mean")
             loss.backward()
             optim.step()
             losses.append(loss.detach().cpu())
