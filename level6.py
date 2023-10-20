@@ -161,7 +161,7 @@ def main():
                     idx = 0
                     for _ in range(5):
                         aa, bb = cur_y_hats[i][idx].item(), cur_y_hats[i][idx + 1].item()
-                        if xmin <= aa <= xmax and ymin <= bb <= ymax:
+                        if xmin <= bb <= xmax and ymin <= aa <= ymax:
                             count += 1
                         idx += 2
                     counts.append(count)
