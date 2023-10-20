@@ -136,7 +136,7 @@ def main():
         #model.eval()
         with torch.no_grad():
             y_hats = []
-            for x, _ in tqdm(test_dl):
+            for x, _, _ in tqdm(test_dl):
                 x = x.to(device, non_blocking=True)
                 y_hat = model(x).squeeze(1)
                 coords_hat = y_hat_to_coord(y_hat=y_hat, blur=blur)
