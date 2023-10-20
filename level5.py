@@ -142,7 +142,7 @@ def main():
                 x = x.to(device, non_blocking=True)
                 y_hat = model(x).squeeze(1)
                 cur_y_hats = []
-                for i in range(4):
+                for i in range(5):
                     coords_hat = y_hat_to_coord(y_hat=y_hat, blur=blur)
                     cur_y_hats.append(coords_hat.cpu())
                     for j in range(len(y_hat)):
