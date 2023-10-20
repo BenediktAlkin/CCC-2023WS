@@ -69,7 +69,6 @@ class MyImageFolder(ImageFolder):
 def y_hat_to_coord(y_hat, blur):
     with torch.no_grad():
         blurred = blur(y_hat.sigmoid().unsqueeze(1)).squeeze(1)
-        blurred += torch.randn_like(blurred) * 0.0001
         max_of_blurred = blurred.flatten(start_dim=1).max(dim=1).values
         coords = (blurred == max_of_blurred[:, None, None]).nonzero()[:, 1:]
     return coords.flip(dims=(1,))
@@ -92,7 +91,7 @@ def main():
     # model.layer3[0].downsample = nn.Conv2d(128, 256, kernel_size=3, padding=1)
     #model.avgpool = nn.Conv2d(512, 2, kernel_size=13)
     from unet import Unet
-    model = Unet(dim=32, depth=2)
+    model = Unet(dim=2, depth=1)
     model = model.to(device)
     optim = AdamW(model.parameters(), lr=0.001, weight_decay=0)
 
@@ -117,6 +116,7 @@ def main():
             optim.step()
             losses.append(loss.detach().cpu())
             # get prediction
+            break
             coords_hat = y_hat_to_coord(y_hat=y_hat, blur=blur)
             if len(coords_hat) != len(coords):
                 print("unequal length")
@@ -124,15 +124,15 @@ def main():
                 cdist = ((coords - coords_hat) ** 2).sum(dim=1).float().mean()
                 cdists.append(cdist.cpu())
         print(f"train loss: {torch.stack(losses).mean().item():.4f}")
-        print(f"cdists: {torch.stack(cdists).mean().item():.4f}")
+        # print(f"cdists: {torch.stack(cdists).mean().item():.4f}")
         # y_hats = torch.concat(y_hats)
         # ys = torch.concat(ys)
         # cdist = ((y_hats - ys.float()) ** 2).sum(dim=1).mean()
         # print(f"cdist: {cdist.item():.4f}")
 
 
-        if (epoch + 1) % 5 != 0 or epoch == 0:
-            continue
+        # if (epoch + 1) % 5 != 0 or epoch == 0:
+        #     continue
 
         #model.eval()
         with torch.no_grad():
@@ -146,7 +146,7 @@ def main():
             y_hats = y_hats.round().long()
 
             # write
-            lines = [f"{y_hat[0].item()},{y_hat[1].item()}" for y_hat in y_hats]
+            lines = [f"{y_hat[1].item()},{y_hat[0].item()}" for y_hat in y_hats]
             with open(out / f"epoch{epoch + 1}.csv", "w") as f:
                 lines = [f"{str(line)}\n" for line in lines[:-1]] + [str(lines[-1])]
                 f.writelines(lines)
