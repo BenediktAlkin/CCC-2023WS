@@ -123,7 +123,6 @@ def main():
             else:
                 cdist = ((coords - coords_hat) ** 2).sum(dim=1).float().mean()
                 cdists.append(cdist.cpu())
-            break
         print(f"train loss: {torch.stack(losses).mean().item():.4f}")
         print(f"cdists: {torch.stack(cdists).mean().item():.4f}")
         # y_hats = torch.concat(y_hats)
@@ -166,7 +165,6 @@ def main():
                             count += 1
                         idx += 2
                     counts.append(count)
-                    break
 
 
             # write
