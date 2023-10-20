@@ -3,10 +3,11 @@ import torch
 import torch.nn.functional as F
 from torch.optim import AdamW
 from torch.utils.data import TensorDataset, DataLoader
-
+from time import time
 
 def main():
-    out = Path("out")
+    out = Path("out") / str(int(time()))
+    print(out.as_posix())
     out.mkdir(exist_ok=True)
     device = torch.device("cuda")
     x = torch.randn(100, 16)

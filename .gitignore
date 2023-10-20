@@ -1,5 +1,6 @@
 *.png
 *.svg
+*.csv
 temp/
 wandb_configs/
 submit/
