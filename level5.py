@@ -69,7 +69,7 @@ class MyImageFolder(ImageFolder):
 def y_hat_to_coord(y_hat, blur):
     with torch.no_grad():
         blurred = blur(y_hat.sigmoid().unsqueeze(1)).squeeze(1)
-        blurred += torch.randn_like(blurred) * 0.0001
+        blurred += torch.randn_like(blurred) * 0.001
         max_of_blurred = blurred.flatten(start_dim=1).max(dim=1).values
         coords = (blurred == max_of_blurred[:, None, None]).nonzero()[:, 1:]
     return coords.flip(dims=(1,))
@@ -145,7 +145,7 @@ def main():
                 for i in range(4):
                     coords_hat = y_hat_to_coord(y_hat=y_hat, blur=blur)
                     cur_y_hats.append(coords_hat.cpu())
-                    for j in range(len(coords_hat)):
+                    for j in range(len(y_hat)):
                         a, b = coords_hat[j]
                         y_hat[j, b - padding:b+padding, a - padding: a + padding] = -10
                 y_hats.append(torch.concat(cur_y_hats, dim=1))
