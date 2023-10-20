@@ -39,8 +39,11 @@ class TwoImageFolder(Dataset):
 
         y = torch.zeros_like(xcoord)
 
-        padding = 7
-        y[y1[1] - padding:y1[1] + padding, y1[0] - padding:y1[0] + padding] = 1
+        if isinstance(y1, int):
+            y = 0
+        else:
+            padding = 7
+            y[y1[1] - padding:y1[1] + padding, y1[0] - padding:y1[0] + padding] = 1
 
         return self.transform(img), y, y1
 
@@ -104,8 +107,11 @@ def main():
             coords = coords.to(device, non_blocking=True)
             y_hat = model(x).squeeze(1)
             optim.zero_grad()
-            #loss = F.mse_loss(y_hat, (y * 5).float())
-            loss = sigmoid_focal_loss(y_hat, y.float(), reduction="mean")
+            unreduced_loss = F.binary_cross_entropy_with_logits(y_hat, y.float(), reduction="none")
+            neg_loss = unreduced_loss[y == 0].mean()
+            pos_loss = unreduced_loss[y == 1].mean()
+            loss = neg_loss + pos_loss * 100
+            #loss = sigmoid_focal_loss(y_hat, y.float(), reduction="mean")
             loss.backward()
             optim.step()
             losses.append(loss.detach().cpu())
