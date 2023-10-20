@@ -154,10 +154,10 @@ def main():
                 for i in range(len(is_fence)):
                     count = 0
                     nonzero = is_fence[i].nonzero()
-                    xmax = nonzero[:, 0].max().item()
-                    xmin = nonzero[:, 0].min().item()
-                    ymax = nonzero[:, 1].max().item()
-                    ymin = nonzero[:, 1].min().item()
+                    ymax = nonzero[:, 0].max().item()
+                    ymin = nonzero[:, 0].min().item()
+                    xmax = nonzero[:, 1].max().item()
+                    xmin = nonzero[:, 1].min().item()
                     idx = 0
                     for _ in range(5):
                         aa, bb = cur_y_hats[i][idx].item(), cur_y_hats[i][idx + 1].item()
