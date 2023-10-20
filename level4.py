@@ -68,7 +68,7 @@ class MyImageFolder(ImageFolder):
 
 def y_hat_to_coord(y_hat, blur):
     with torch.no_grad():
-        blurred = blur(blur(y_hat.sigmoid().unsqueeze(1))).squeeze(1)
+        blurred = blur(y_hat.sigmoid().unsqueeze(1)).squeeze(1)
         blurred += torch.randn_like(blurred) * 0.0001
         max_of_blurred = blurred.flatten(start_dim=1).max(dim=1).values
         coords = (blurred == max_of_blurred[:, None, None]).nonzero()[:, 1:]
@@ -146,7 +146,7 @@ def main():
             y_hats = y_hats.round().long()
 
             # write
-            lines = [f"{y_hat[1].item()},{y_hat[0].item()}" for y_hat in y_hats]
+            lines = [f"{y_hat[0].item()},{y_hat[1].item()}" for y_hat in y_hats]
             with open(out / f"epoch{epoch + 1}.csv", "w") as f:
                 lines = [f"{str(line)}\n" for line in lines[:-1]] + [str(lines[-1])]
                 f.writelines(lines)
