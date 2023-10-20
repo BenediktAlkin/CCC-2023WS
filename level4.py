@@ -68,10 +68,10 @@ class MyImageFolder(ImageFolder):
 
 def y_hat_to_coord(y_hat, blur):
     with torch.no_grad():
-        blurred = blur(y_hat.unsqueeze(1)).squeeze(1)
+        blurred = blur(y_hat.sigmoid().unsqueeze(1)).squeeze(1)
         max_of_blurred = blurred.flatten(start_dim=1).max(dim=1).values
         coords = (blurred == max_of_blurred[:, None, None]).nonzero()[:, 1:]
-    return coords
+    return coords.flip(dims=(1,))
 
 def main():
     out = Path("out") / str(int(time()))
@@ -117,8 +117,11 @@ def main():
             losses.append(loss.detach().cpu())
             # get prediction
             coords_hat = y_hat_to_coord(y_hat=y_hat, blur=blur)
-            cdist = ((coords - coords_hat) ** 2).sum(dim=1).float().mean()
-            cdists.append(cdist.cpu())
+            if len(coords_hat) != len(coords):
+                print("unequal length")
+            else:
+                cdist = ((coords - coords_hat) ** 2).sum(dim=1).float().mean()
+                cdists.append(cdist.cpu())
         print(f"train loss: {torch.stack(losses).mean().item():.4f}")
         print(f"cdists: {torch.stack(cdists).mean().item():.4f}")
         # y_hats = torch.concat(y_hats)
