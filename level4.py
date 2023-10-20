@@ -32,8 +32,8 @@ class TwoImageFolder(Dataset):
         x2 = to_tensor(x2)
         img = torch.min(x1, x2)
         xcoord = torch.arange(img.size(1)).unsqueeze(1).repeat(1, img.size(1))
-        ycoord = torch.arange(img.size(2)).unsqueeze(0).repeat(img.size(2), 1)
-        img = torch.concat([img, xcoord.unsqueeze(0), ycoord.unsqueeze(0)])
+        # ycoord = torch.arange(img.size(2)).unsqueeze(0).repeat(img.size(2), 1)
+        # img = torch.concat([img, xcoord.unsqueeze(0), ycoord.unsqueeze(0)])
 
         y = torch.zeros_like(xcoord)
 

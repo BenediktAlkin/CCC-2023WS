@@ -77,7 +77,7 @@ class Unet(nn.Module):
         block_ctor = ResnetBlock2d
         upsample_conv_ctor = UpsampleConv2d
         # stem
-        self.stem = nn.Conv2d(5, dim, kernel_size=7, padding=3)
+        self.stem = nn.Conv2d(3, dim, kernel_size=7, padding=3)
 
         # create properties of hourglass architecture
         in_dims = []
