@@ -12,6 +12,7 @@ sbatch_config.yaml
 static_config.yaml
 wandb_config*.yaml
 hyperparams*.yaml
+out/
 
 log*.txt
 log*.log
